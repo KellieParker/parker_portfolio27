@@ -21,7 +21,7 @@ Calm, polished, editorial. Midnight's structure and pacing: a dark gray gradient
 | Content sections | White `#FFFFFF` | Everything between hero and footer |
 | Text on dark | Cream `#F3EFE8` | Muted version at ~42% opacity for second sentences |
 | Text on white | Near-black `#111113` | Muted version at ~42% opacity |
-| Accent | Iridescent pink, lilac, butter yellow, periwinkle | Comes from the 3D gem only; no other color on the page |
+| Accent | Iridescent pink, lilac, butter yellow, periwinkle | Comes from the 3D gem only; cards and everything else stay neutral |
 
 Page rhythm: **dark hero → white content → dark footer.**
 
@@ -45,10 +45,10 @@ Page rhythm: **dark hero → white content → dark footer.**
 
 Case study cards, inspired by soft product UI cards (nested panels, pills, small stat labels):
 - Light gray shell (`#F5F5F6`) with a hairline border and large radius, holding a nested media panel
-- Header row: mono number `(001)`, a category pill with a colored dot, and a round ↗ button
-- Media panel: a soft pastel wash (pulled from the gem colors) with the project screenshot floating on it
+- Header row: mono number `(001)`, a gray-dot pill, and a round ↗ button
+- Media panel: neutral gray wash with the project screenshot floating on it (all work is product UX/UI)
 - Body: project name, one-line summary, then mono facts row (`ROLE • YEAR`)
-- Layout: first project is featured full-width, the rest in a 2-column grid (1 column on mobile)
+- Three projects: first is featured full-width, the other two side by side (1 column on mobile)
 - Hover: card lifts slightly, screenshot rises, arrow rotates
 
 ## Motion
