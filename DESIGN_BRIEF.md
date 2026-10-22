@@ -43,8 +43,13 @@ Page rhythm: **dark hero → white content → dark footer.**
 
 ## Projects
 
-- Large editorial images
-- Mono label row per project, for example: `(001)  PROJECT NAME  CATEGORY • ROLE • YEAR  ↗`
+Case study cards, inspired by soft product UI cards (nested panels, pills, small stat labels):
+- Light gray shell (`#F5F5F6`) with a hairline border and large radius, holding a nested media panel
+- Header row: mono number `(001)`, a category pill with a colored dot, and a round ↗ button
+- Media panel: a soft pastel wash (pulled from the gem colors) with the project screenshot floating on it
+- Body: project name, one-line summary, then mono facts row (`ROLE • YEAR`)
+- Layout: first project is featured full-width, the rest in a 2-column grid (1 column on mobile)
+- Hover: card lifts slightly, screenshot rises, arrow rotates
 
 ## Motion
 
