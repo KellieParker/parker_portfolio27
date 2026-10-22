@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Holo Heart Gem — Hero</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.184.0/build/three.module.js",
+    "three/addons/controls/OrbitControls.js": "https://unpkg.com/three@0.184.0/examples/jsm/controls/OrbitControls.js",
+    "three/addons/exporters/OBJExporter.js": "https://unpkg.com/three@0.184.0/examples/jsm/exporters/OBJExporter.js",
+    "three/addons/exporters/GLTFExporter.js": "https://unpkg.com/three@0.184.0/examples/jsm/exporters/GLTFExporter.js"
+  },
+  "integrity": {
+    "https://unpkg.com/three@0.184.0/build/three.module.js": "sha384-8FCZ1eVO6it4+pbec2aDtnTrwjWXZLJRC+MAGCIPDgsYnUrl/E0A2YlF8ioMKI/J",
+    "https://unpkg.com/three@0.184.0/build/three.core.js": "sha384-dw2ooPewaEIrAgl6oFDBmmBWCE9oW9LxRGcfwZ0hLvEprzo202wXl7vCYHRlSnOT",
+    "https://unpkg.com/three@0.184.0/examples/jsm/controls/OrbitControls.js": "sha384-4rziNxOBZKQ69i+w+f89KJ55TCYquwchVbByQwmaOeIOXdOU2PLDn3kOfXHwIJC9",
+    "https://unpkg.com/three@0.184.0/examples/jsm/exporters/OBJExporter.js": "sha384-nbwtoZENJD3Vq+ACK0CuGQdPMuDWHkamC2KJD70EV5nfg6jQjfppKOea07YJN+N3",
+    "https://unpkg.com/three@0.184.0/examples/jsm/exporters/GLTFExporter.js": "sha384-VofkvpG6HERhFCYbsUOHeNXBCqID2nfqkQqnVzE1jc/oPcz+qJ13ADdXH08hE+cQ"
+  }
+}
+</script>
+<style>
+  html, body { margin: 0; height: 100%; background: transparent; overflow: hidden; }
+  a { color: inherit; } a:hover { color: inherit; }
+  three-d-stage:not(:defined) { visibility: hidden; }
+  three-d-stage { width: 100vw; height: 100vh; }
+</style>
+</head>
+<body>
+<three-d-stage name="holo_heart_gem" background="transparent"></three-d-stage>
+<script src="three-d-stage.js"></script>
+<script type="module">
+const stage = document.querySelector('three-d-stage');
+const { THREE } = await stage.ready;
+const renderer = stage._renderer, scene = stage._scene, camera = stage._camera, controls = stage._controls;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.15;
+stage._ground.visible = false;
+renderer.setClearColor(0x000000, 0);
+stage.shadowRoot.querySelectorAll('.toolbar, .note').forEach(e => e.style.display = 'none');
+controls.enabled = false;
+
+// --- Studio environment: dark dome with neon softboxes + white strip lights
+const env = new THREE.Scene();
+env.add(new THREE.Mesh(new THREE.SphereGeometry(10, 32, 16), new THREE.MeshBasicMaterial({ color: 0x1a0c33, side: THREE.BackSide })));
+const neon = [0xff2a2a, 0xff8a1f, 0xffe31f, 0x3dff5a, 0x1fe8ff, 0x2b5bff, 0x8a3bff, 0xff2bd6];
+let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+for (let i = 0; i < 72; i++) {
+  const white = i % 4 === 0;
+  const c = new THREE.Color(white ? 0xffffff : neon[i % neon.length]).multiplyScalar(white ? 6 : 3.2);
+  const w = white ? 0.18 + rnd() * 0.25 : 1.2 + rnd() * 2.2, h = white ? 2 + rnd() * 3 : 1.2 + rnd() * 2.2;
+  const p = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ color: c, side: THREE.DoubleSide }));
+  const th = rnd() * Math.PI * 2, ph = Math.acos(rnd() * 1.8 - 0.9);
+  p.position.setFromSphericalCoords(6, ph, th);
+  p.lookAt(0, 0, 0); p.rotateZ(rnd() * Math.PI);
+  env.add(p);
+}
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(env, 0.015).texture;
+
+// --- Heart brilliant geometry (crown, girdle, pavilion; flat facets)
+const N = 40, S = 0.3 / 32;                 // ~30 cm wide sculpture
+const C = new THREE.Vector2(0, -2);
+// Outline: two round lobes, straight tangent sides, softly rounded tip
+const heart = (() => {
+  const R = 8.5, c1 = new THREE.Vector2(7.5, 4), r = 3.2, c2 = new THREE.Vector2(0, -13.2);
+  const D = c2.clone().sub(c1), phi = Math.atan2(D.y, D.x), off = Math.acos((R - r) / D.length());
+  let na = phi + off; if (Math.cos(na) <= 0) na = phi - off;
+  const a0 = Math.atan2(Math.sqrt(R * R - c1.x * c1.x), -c1.x);
+  const right = [];
+  for (let k = 0; k <= 200; k++) { const a = a0 + (na - a0) * k / 200; right.push(new THREE.Vector2(c1.x + R * Math.cos(a), c1.y + R * Math.sin(a))); }
+  const pA = right[right.length - 1], pB = new THREE.Vector2(c2.x + r * Math.cos(na), c2.y + r * Math.sin(na));
+  for (let k = 1; k < 60; k++) right.push(pA.clone().lerp(pB, k / 60));
+  for (let k = 0; k <= 80; k++) { const a = na + (-Math.PI / 2 - na) * k / 80; right.push(new THREE.Vector2(c2.x + r * Math.cos(a), c2.y + r * Math.sin(a))); }
+  right[0].x = 0; right[right.length - 1].x = 0;
+  const pts = right.concat(right.slice(0, -1).reverse().slice(0, -1).map(p => new THREE.Vector2(-p.x, p.y)));
+  pts.push(pts[0].clone());
+  const cum = [0]; for (let k = 1; k < pts.length; k++) cum.push(cum[k - 1] + pts[k].distanceTo(pts[k - 1]));
+  const L = cum[cum.length - 1];
+  return (t) => {
+    const d = ((t / (Math.PI * 2)) % 1) * L;
+    let k = 1; while (k < cum.length - 1 && cum[k] < d) k++;
+    return pts[k - 1].clone().lerp(pts[k], (d - cum[k - 1]) / (cum[k] - cum[k - 1] || 1));
+  };
+})();
+const ring = (k, z, half) => Array.from({ length: N }, (_, i) => {
+  const p = heart(((i + (half ? 0.5 : 0)) / N) * Math.PI * 2);
+  const q = C.clone().add(p.sub(C).multiplyScalar(k));
+  return new THREE.Vector3(q.x * S, q.y * S, z);
+});
+const crownH = 0.048, g = 0.003;
+const T = ring(0.46, crownH, false), M = ring(0.82, crownH * 0.48, true);
+const GT = ring(1, g, false), GB = ring(1, -g, false);
+const TB = ring(0.46, -crownH, false), MB = ring(0.82, -crownH * 0.48, true);
+const top = new THREE.Vector3(C.x * S, C.y * S, crownH), bot = new THREE.Vector3(C.x * S, C.y * S, -crownH);
+const pos = [], v = new THREE.Vector3(), w = new THREE.Vector3();
+const tri = (a, b, c, exp) => {
+  v.subVectors(b, a); w.subVectors(c, a); v.cross(w);
+  if (v.dot(exp) < 0) [b, c] = [c, b];
+  pos.push(a.x, a.y, a.z, b.x, b.y, b.z, c.x, c.y, c.z);
+};
+const UP = new THREE.Vector3(0, 0, 1), DN = new THREE.Vector3(0, 0, -1);
+for (let i = 0; i < N; i++) {
+  const j = (i + 1) % N, h = (i + N - 1) % N;
+  tri(top, T[i], T[j], UP);                       // table
+  tri(T[i], T[j], M[i], UP);                      // star
+  tri(T[i], M[i], M[h], UP);                      // bezel kite (upper)
+  tri(M[h], GT[i], M[i], UP);                     // bezel kite (lower)
+  tri(M[i], GT[i], GT[j], UP);                    // upper girdle
+  const d = new THREE.Vector3().subVectors(GT[j], GT[i]);
+  const out = new THREE.Vector3(-d.y, d.x, 0);
+  tri(GT[i], GT[j], GB[j], out); tri(GT[i], GB[j], GB[i], out); // girdle band
+  tri(bot, TB[i], TB[j], DN);                     // back table
+  tri(TB[i], TB[j], MB[i], DN);                   // back star
+  tri(TB[i], MB[i], MB[h], DN);                   // back bezel kite (upper)
+  tri(MB[h], GB[i], MB[i], DN);                   // back bezel kite (lower)
+  tri(MB[i], GB[i], GB[j], DN);                   // back girdle facets
+}
+const geo = new THREE.BufferGeometry();
+geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+geo.computeVertexNormals();
+geo.computeBoundingBox();
+const ctr = geo.boundingBox.getCenter(new THREE.Vector3());
+geo.translate(-ctr.x, -ctr.y, -ctr.z);
+
+const core = new THREE.MeshPhysicalMaterial({
+  name: 'crystal_core', color: 0xffffff, metalness: 1, roughness: 0.04, side: THREE.BackSide,
+  iridescence: 1, iridescenceIOR: 1.8, iridescenceThicknessRange: [100, 1200], envMapIntensity: 1.8,
+});
+const facets = new THREE.MeshPhysicalMaterial({
+  name: 'crystal_facets', color: 0xffffff, metalness: 0.2, roughness: 0, transparent: true, opacity: 0.26,
+  iridescence: 1, iridescenceIOR: 2.1, iridescenceThicknessRange: [120, 1000], clearcoat: 1, clearcoatRoughness: 0,
+  ior: 2.4, specularIntensity: 1, envMapIntensity: 2.6, depthWrite: false,
+});
+const gem = new THREE.Group(); gem.name = 'heart_gem';
+const coreMesh = new THREE.Mesh(geo, core); coreMesh.name = 'crystal_interior';
+const faceMesh = new THREE.Mesh(geo, facets); faceMesh.name = 'crystal_facets'; faceMesh.renderOrder = 1;
+gem.add(coreMesh, faceMesh);
+stage.setObject(gem);
+gem.traverse(o => { if (o.isMesh) { o.castShadow = false; o.receiveShadow = false; } });
+
+// reframe: straight-on, slightly above
+{
+  const tgt = controls.target, d = camera.position.distanceTo(tgt) * 1.05;
+  camera.position.copy(tgt).add(new THREE.Vector3(0, 0.12, 1).normalize().multiplyScalar(d));
+  controls.update();
+}
+
+// --- FX (not exported): colored orbiting lights, glints, holo rings, dust
+const lights = [0xff4a3a, 0x3dff7a, 0x4a6bff].map(c => { const l = new THREE.PointLight(c, 3, 2, 1.5); scene.add(l); return l; });
+
+const starTex = (() => {
+  const cv = document.createElement('canvas'); cv.width = cv.height = 128; const x = cv.getContext('2d');
+  const r = x.createRadialGradient(64, 64, 0, 64, 64, 22);
+  r.addColorStop(0, 'rgba(255,255,255,1)'); r.addColorStop(0.3, 'rgba(255,255,255,0.6)'); r.addColorStop(1, 'rgba(255,255,255,0)');
+  x.fillStyle = r; x.fillRect(0, 0, 128, 128);
+  for (const [w2, h2] of [[64, 1.5], [1.5, 64]]) {
+    const lg = w2 > h2 ? x.createLinearGradient(0, 64, 128, 64) : x.createLinearGradient(64, 0, 64, 128);
+    lg.addColorStop(0, 'rgba(255,255,255,0)'); lg.addColorStop(0.5, 'rgba(255,255,255,1)'); lg.addColorStop(1, 'rgba(255,255,255,0)');
+    x.fillStyle = lg; x.fillRect(64 - w2, 64 - h2, w2 * 2, h2 * 2);
+  }
+  const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; return t;
+})();
+const dotTex = (() => {
+  const cv = document.createElement('canvas'); cv.width = cv.height = 32; const x = cv.getContext('2d');
+  const r = x.createRadialGradient(16, 16, 0, 16, 16, 16); r.addColorStop(0, 'rgba(255,255,255,1)'); r.addColorStop(1, 'rgba(255,255,255,0)');
+  x.fillStyle = r; x.fillRect(0, 0, 32, 32); return new THREE.CanvasTexture(cv);
+})();
+
+const fx = new THREE.Group(); scene.add(fx);
+const glintSrc = [...T, ...M, ...GT].map(p => [p.clone().sub(ctr), 1]).concat([...TB, ...MB, ...GB].map(p => [p.clone().sub(ctr), -1]));
+const glints = Array.from({ length: 16 }, (_, i) => {
+  const m = new THREE.SpriteMaterial({ map: starTex, color: new THREE.Color().setHSL((0.5 + i * 0.137) % 1, 1, 0.75), blending: THREE.AdditiveBlending, depthWrite: false, depthTest: false, transparent: true });
+  const s = new THREE.Sprite(m);
+  const [gp, side] = glintSrc[Math.floor(rnd() * glintSrc.length)];
+  s.position.copy(gp).add(new THREE.Vector3(0, 0, 0.002 * side));
+  s.userData = { side, size: 0.05 + rnd() * 0.06, phase: rnd(), freq: 1 + Math.floor(rnd() * 3) };
+  fx.add(s); return s;
+});
+
+const halo = new THREE.Group(); halo.visible = false; scene.add(halo);
+const mkRing = (r, color, tilt) => {
+  const m = new THREE.Mesh(new THREE.TorusGeometry(r, 0.0007, 8, 160), new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.55, blending: THREE.AdditiveBlending, depthWrite: false }));
+  m.rotation.x = tilt; halo.add(m); return m;
+};
+const rA = mkRing(0.235, 0x37e8ff, Math.PI / 2 - 0.18), rB = mkRing(0.26, 0xff4fe0, Math.PI / 2 + 0.12);
+const dustN = 160, dpos = new Float32Array(dustN * 3), dcol = new Float32Array(dustN * 3);
+for (let i = 0; i < dustN; i++) {
+  const r = 0.2 + rnd() * 0.25, a = rnd() * Math.PI * 2;
+  dpos.set([Math.cos(a) * r, (rnd() - 0.5) * 0.35, Math.sin(a) * r], i * 3);
+  const c = new THREE.Color(neon[i % neon.length]); dcol.set([c.r, c.g, c.b], i * 3);
+}
+const dgeo = new THREE.BufferGeometry();
+dgeo.setAttribute('position', new THREE.BufferAttribute(dpos, 3));
+dgeo.setAttribute('color', new THREE.BufferAttribute(dcol, 3));
+const dust = new THREE.Points(dgeo, new THREE.PointsMaterial({ size: 0.006, map: dotTex, vertexColors: true, transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending, depthWrite: false }));
+halo.add(dust);
+halo.position.copy(controls.target);
+
+// --- Seamless 10 s loop: every motion is an integer multiple of the base period
+const LOOP = 10, TAU = Math.PI * 2;
+const base = controls.target.clone();
+const hue = new THREE.Color(), camDir = new THREE.Vector3(), nrm = new THREE.Vector3();
+const update = (t) => {
+  const u = (t % LOOP) / LOOP, a = u * TAU;
+  gem.position.copy(base);
+  gem.rotation.set(0.07 * Math.sin(a), a, 0.035 * Math.sin(a * 2));
+  fx.position.copy(gem.position); fx.rotation.copy(gem.rotation);
+  halo.position.copy(gem.position);
+  halo.rotation.y = -a; rA.rotation.z = a; rB.rotation.z = -a * 2;
+
+  hue.setHSL(u, 0.35, 0.82);
+  core.color.copy(hue);
+  core.iridescenceThicknessRange[1] = 1000 + 300 * Math.sin(a * 2);
+  facets.iridescenceThicknessRange[1] = 850 + 250 * Math.cos(a * 3);
+
+  lights.forEach((l, i) => {
+    const b = -a * (i === 1 ? 2 : 1) + i * TAU / 3;
+    l.position.set(base.x + Math.cos(b) * 0.4, base.y + 0.15 * Math.sin(b * 2 + i), base.z + Math.sin(b) * 0.4);
+  });
+
+  camDir.subVectors(camera.position, gem.position).normalize();
+  nrm.set(0, 0, 1).applyEuler(gem.rotation);
+  const fd = nrm.dot(camDir);
+  glints.forEach((s) => {
+    const { size, phase, freq, side } = s.userData;
+    const facing = Math.max(0, fd * side);
+    const f = Math.max(0, Math.sin(TAU * (u * freq * 3 + phase))) ** 24 * facing ** 3;
+    s.material.opacity = f;
+    s.scale.setScalar(size * (0.4 + 0.6 * f));
+  });
+};
+const t0 = performance.now();
+renderer.setAnimationLoop(() => {
+  controls.update();
+  update((performance.now() - t0) / 1000);
+  renderer.render(scene, camera);
+});
+stage._loop = () => { controls.update(); update((performance.now() - t0) / 1000); renderer.render(scene, camera); };
+</script>
+</body>
+</html>

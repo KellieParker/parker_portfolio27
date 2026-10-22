@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Homepage Prototype</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0E0E0F;
+    --cream: #F3EFE8;
+    --white: #FFFFFF;
+    --text-dark: #111113;
+    --muted-dark: rgba(17, 17, 19, 0.42);
+    --line-dark: rgba(17, 17, 19, 0.1);
+    --text-light: #F3EFE8;
+    --muted-light: rgba(243, 239, 232, 0.42);
+    --line-light: rgba(243, 239, 232, 0.14);
+    --sans: "Geist", system-ui, sans-serif;
+    --serif: "Instrument Serif", Georgia, serif;
+    --mono: "Geist Mono", ui-monospace, monospace;
+    --gutter: 48px;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { background: var(--white); color: var(--text-dark); font-family: var(--sans); -webkit-font-smoothing: antialiased; }
+  a { color: inherit; text-decoration: none; }
+  .mono { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; }
+
+  /* Dark gray gradient wash, shared by the hero and the footer */
+  .dark { position: relative; overflow: hidden; background: var(--ink); color: var(--text-light); }
+  .dark::before {
+    content: ""; position: absolute; inset: -20%;
+    background:
+      radial-gradient(40% 45% at 20% 30%, #3A3A3D 0%, transparent 70%),
+      radial-gradient(35% 40% at 75% 20%, #2A2A2D 0%, transparent 70%),
+      radial-gradient(45% 45% at 80% 80%, #333336 0%, transparent 70%),
+      radial-gradient(35% 35% at 25% 90%, #1E1E21 0%, transparent 70%);
+    filter: blur(70px);
+    animation: drift 18s ease-in-out infinite alternate;
+  }
+  .dark > * { position: relative; z-index: 1; }
+  @keyframes drift { to { transform: translate(3%, -2%) scale(1.06); } }
+
+  /* Hero */
+  .hero { min-height: 100vh; display: flex; flex-direction: column; }
+  nav { display: flex; justify-content: space-between; align-items: center; padding: 28px var(--gutter); font-size: 12px; }
+  nav .links { display: flex; gap: 28px; }
+  nav a:hover { opacity: 0.6; }
+  .hero .body { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 0 var(--gutter); }
+
+  /* 90x90 heart; the iframe is larger than the visible box because the stage pads the object */
+  .mark { position: relative; width: 90px; height: 90px; margin-bottom: 24px; }
+  .mark iframe { position: absolute; width: 180px; height: 180px; left: -47px; top: -45px; border: 0; background: transparent; pointer-events: none; }
+
+  h1 { font-weight: 400; font-size: clamp(32px, 4.6vw, 72px); line-height: 1.08; letter-spacing: -0.02em; margin: 0; }
+  h1 em, h2 em { font-family: var(--serif); font-style: italic; font-size: 1.12em; letter-spacing: -0.01em; }
+  .hero .muted, .hero .glyph { color: var(--muted-light); }
+  .glyph { font-weight: 300; }
+
+  .meta { display: flex; justify-content: space-between; align-items: flex-end; padding: 24px 0 32px; margin: 0 var(--gutter); border-top: 1px solid var(--line-light); color: var(--muted-light); }
+  .meta b { color: var(--text-light); font-weight: 500; }
+  .meta .roles { display: flex; flex-direction: column; gap: 6px; }
+
+  /* Selected work (white) */
+  .work { padding: 120px var(--gutter) 140px; }
+  .section-head { font-size: clamp(22px, 2vw, 30px); font-weight: 400; letter-spacing: -0.01em; line-height: 1.25; margin: 0 0 64px; max-width: 640px; }
+  .section-head .muted { color: var(--muted-dark); }
+  .projects { display: grid; gap: 88px; }
+  .project { display: block; }
+  .project .label { display: grid; grid-template-columns: 64px 1fr 1fr auto; gap: 16px; padding-bottom: 14px; color: var(--muted-dark); }
+  .project .label .name { color: var(--text-dark); }
+  .project .img { aspect-ratio: 16 / 9; border-radius: 6px; overflow: hidden; background: #EDEDEE; position: relative; }
+  .project .img span { position: absolute; inset: 0; display: grid; place-items: center; color: rgba(17,17,19,0.3); }
+  .project .img > div { position: absolute; inset: 0; transition: transform .8s cubic-bezier(.2,.7,.2,1); }
+  .project:hover .img > div { transform: scale(1.02); }
+  .project p { margin: 16px 0 0; font-size: 17px; line-height: 1.5; color: var(--muted-dark); max-width: 560px; }
+
+  /* Footer (dark) */
+  .site-footer { padding: 120px var(--gutter) 32px; }
+  .site-footer h2 { font-weight: 400; font-size: clamp(32px, 4.6vw, 72px); line-height: 1.08; letter-spacing: -0.02em; margin: 0 0 120px; }
+  .site-footer h2 .muted { color: var(--muted-light); }
+  .site-footer .row { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; padding-top: 24px; border-top: 1px solid var(--line-light); color: var(--muted-light); }
+  .site-footer .links { display: flex; gap: 28px; color: var(--text-light); }
+  .site-footer .links a:hover { opacity: 0.6; }
+
+  /* Motion */
+  .reveal { opacity: 0; transform: translateY(16px); animation: in 1s cubic-bezier(.2,.7,.2,1) forwards; }
+  .reveal.d2 { animation-delay: .15s; } .reveal.d3 { animation-delay: .3s; }
+  @keyframes in { to { opacity: 1; transform: none; } }
+  .scroll { opacity: 0; transform: translateY(24px); transition: opacity 1s cubic-bezier(.2,.7,.2,1), transform 1s cubic-bezier(.2,.7,.2,1); }
+  .scroll.in { opacity: 1; transform: none; }
+  @media (prefers-reduced-motion: reduce) {
+    .reveal, .scroll { opacity: 1; transform: none; animation: none; transition: none; }
+    .dark::before { animation: none; }
+  }
+
+  @media (max-width: 800px) {
+    :root { --gutter: 16px; }
+    .meta, .site-footer .row { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .project .label { grid-template-columns: 48px 1fr; }
+    .project .label .hide-sm { display: none; }
+    .work { padding-top: 80px; padding-bottom: 96px; }
+  }
+</style>
+</head>
+<body>
+
+<section class="hero dark">
+  <nav class="mono reveal">
+    <a href="#">Kellie Parker</a>
+    <div class="links"><a href="#work">Work</a><a href="#">About</a><a href="#">Resume ↗</a></div>
+  </nav>
+  <div class="body">
+    <div class="mark reveal d2"><iframe src="heart.html" title="Heart gem" aria-hidden="true" tabindex="-1"></iframe></div>
+    <h1 class="reveal d2">
+      <em>Kellie Parker</em> is a product designer <span class="glyph">✦</span> who turns messy problems into calm, clear experiences.
+      <span class="muted">Currently crafting tiny details and big ideas <span class="glyph">⊹</span> with a soft spot for systems.</span>
+    </h1>
+  </div>
+  <div class="meta mono reveal d3">
+    <span class="roles"><span>Currently designing @ <b>Alpha FMC</b></span><span>Previously @ <b>Walt Disney World</b></span></span>
+    <a href="#work">↓ Selected work</a>
+  </div>
+</section>
+
+<section class="work" id="work">
+  <h2 class="section-head scroll">Selected work. <span class="muted">A few projects I'm proud of, from big systems to tiny details.</span></h2>
+  <div class="projects">
+    <a class="project scroll" href="#">
+      <div class="label mono"><span>(001)</span><span class="name">Project One</span><span class="hide-sm">Product Design • 2026</span><span>↗</span></div>
+      <div class="img"><div style="background: linear-gradient(135deg, #EDEDEE, #E2E2E4)"></div><span class="mono">Project image</span></div>
+      <p>One-line summary of the project and the outcome it drove.</p>
+    </a>
+    <a class="project scroll" href="#">
+      <div class="label mono"><span>(002)</span><span class="name">Project Two</span><span class="hide-sm">UX Design • 2025</span><span>↗</span></div>
+      <div class="img"><div style="background: linear-gradient(135deg, #E9E9EB, #DEDEE1)"></div><span class="mono">Project image</span></div>
+      <p>One-line summary of the project and the outcome it drove.</p>
+    </a>
+    <a class="project scroll" href="#">
+      <div class="label mono"><span>(003)</span><span class="name">Project Three</span><span class="hide-sm">Design Systems • 2024</span><span>↗</span></div>
+      <div class="img"><div style="background: linear-gradient(135deg, #EDEDEE, #E4E4E6)"></div><span class="mono">Project image</span></div>
+      <p>One-line summary of the project and the outcome it drove.</p>
+    </a>
+  </div>
+</section>
+
+<footer class="site-footer dark">
+  <h2 class="scroll">Let's make something <em>lovely</em> <span class="glyph muted">✦</span><br><span class="muted">My inbox is always open.</span></h2>
+  <div class="row mono">
+    <span>© 2026 Kellie Parker</span>
+    <div class="links"><a href="#">LinkedIn ↗</a><a href="#">Email ↗</a><a href="#">Resume ↗</a></div>
+  </div>
+</footer>
+
+<script>
+  const io = new IntersectionObserver((entries) => {
+    for (const e of entries) if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+  }, { threshold: 0.15 });
+  document.querySelectorAll('.scroll').forEach((el) => io.observe(el));
+</script>
+</body>
+</html>

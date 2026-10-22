@@ -4,7 +4,7 @@ Working notes on the look and feel of the site. Update as the direction evolves.
 
 ## Overall direction
 
-Calm, polished, editorial. Midnight's structure and pacing, with a soft pink gradient hero (inspired by Maxine Ancheta's pink version) and small moments of personality.
+Calm, polished, editorial. Midnight's structure and pacing: a dark gray gradient hero and footer bookending a clean white middle, with small moments of personality.
 
 **References**
 - askmidnight.com: structure, palette, scroll motion, two-tone headlines
@@ -17,14 +17,13 @@ Calm, polished, editorial. Midnight's structure and pacing, with a soft pink gra
 
 | Role | Color | Notes |
 |---|---|---|
-| Background | Cream `#F3EFE8` | Main page background |
-| Surface | White `#FFFFFF` | Cards, alternating sections |
-| Dark | Navy `#07172A` | Dark sections, footer, primary text |
-| Muted text | Gray | Second half of two-tone headlines |
-| Hero wash | Soft pink gradient | Blurred, atmospheric, behind hero text |
-| Accent | Iridescent pink, lilac, butter yellow, periwinkle | Used sparingly: 3D objects, glows, hover states |
+| Hero + footer | Dark gray gradient on `#0E0E0F` | Soft, slowly drifting blur of near-black and dark grays |
+| Content sections | White `#FFFFFF` | Everything between hero and footer |
+| Text on dark | Cream `#F3EFE8` | Muted version at ~42% opacity for second sentences |
+| Text on white | Near-black `#111113` | Muted version at ~42% opacity |
+| Accent | Iridescent pink, lilac, butter yellow, periwinkle | Comes from the 3D gem only; no other color on the page |
 
-Sections alternate between light (cream/white) and dark (navy gradient) to set the rhythm as you scroll.
+Page rhythm: **dark hero → white content → dark footer.**
 
 ## Typography
 
@@ -35,10 +34,11 @@ Sections alternate between light (cream/white) and dark (navy gradient) to set t
 
 ## Hero
 
-- A few sentences about who I am, with my name in italic serif
-- Personality from special characters (for example ✦ ⊹ ↗ ◐), **no kaomoji**
-- Soft pink gradient wash behind the text
-- Small animated 3D object (I have these as HTML + JS files)
+- Full-width intro text spanning the page, my name in italic serif
+- Personality from special characters (for example ✦ ⊹), **no kaomoji**
+- Dark gray gradient background
+- One 3D holo heart (~90×90) above my name, left-aligned with the first letter
+- Bottom row in mono: "Currently designing @ Alpha FMC" / "Previously @ Walt Disney World"
 - No photo of me here
 
 ## Projects
@@ -50,7 +50,7 @@ Sections alternate between light (cream/white) and dark (navy gradient) to set t
 
 - Smooth scroll-triggered reveals, polished not flashy
 - Subtle hover states (possibly an iridescent glow)
-- 3D object gently animated in the hero
+- 3D heart slowly spinning in the hero
 
 ## Copy
 
@@ -62,6 +62,16 @@ Sections alternate between light (cream/white) and dark (navy gradient) to set t
 - **Home:** hero, featured projects, footer
 - **Work / [project]:** case study template
 - **About:** bio, photo of me, links (LinkedIn, email, resume)
+
+## Footer
+
+- Dark gray gradient, matching the hero
+- Big closing line with a playful touch, plus LinkedIn, email, resume links
+
+## 3D assets
+
+- `prototype/heart.html`, `star.html`, `flower.html` share one `three-d-stage.js`
+- Transparent backgrounds, so they sit on any section
 
 ## Not doing
 
